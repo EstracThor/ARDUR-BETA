@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% block actions %}
+<a class="btn btn-primary" href="{% url 'notif-ordenes' %}">Ver órdenes transferidas</a>
+{% endblock %}{% block content %}
+<div class="kpi-grid">{% for label,value in stats.items %}<div class="kpi">
+    <span>{{ label|capfirst }}</span>
+    <strong>{{ value }}</strong></div>
+    {% endfor %}
+</div>
+<section class="panel"><h2>Planificación de notificaciones</h2>
+    <p>Los expedientes llegan después del registro de la preliminar y su transferencia a LISTO PARA NOTIFICAR.</p>
+    <a class="btn btn-outline-primary" href="{% url 'notif-mapa' %}">Abrir mapa</a>
+    <a class="btn btn-outline-primary" href="{% url 'notif-lotes' %}">Consultar lotes</a>
+</section>
+{% endblock %}

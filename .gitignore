@@ -1,0 +1,14 @@
+.venv/
+.env
+media/
+staticfiles/
+__pycache__/
+*.pyc
+.local/
+data/input/
+
+# Evidencia local basada en datos reales (no publicar)
+docs/screenshots/
+docs/input-inspection.json
+docs/real-import-validation.json
+docs/demo-workflow-validation.json

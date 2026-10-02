@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<section class="panel"><table class="table"><thead><tr><th>Usuario</th><th>Activo</th><th>Asignaciones</th></tr></thead><tbody>{% for n in notificadores %}<tr><td>{{ n.username }}</td><td>{{ n.is_active|yesno:'Sí,No' }}</td><td>{{ n.asignaciones }}</td></tr>{% endfor %}</tbody></table></section>{% endblock %}

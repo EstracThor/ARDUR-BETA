@@ -1,0 +1,4 @@
+document.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select').forEach(el=>{if(!el.className)el.className=el.tagName==='SELECT'?'form-select':'form-control'});
+document.querySelectorAll('[data-confirm]').forEach(el=>el.addEventListener('click',e=>{if(!window.confirm(el.dataset.confirm))e.preventDefault()}));
+const progress=document.getElementById('import-progress');
+if(progress){const tick=async()=>{try{const response=await fetch(progress.dataset.url);if(!response.ok)throw new Error('No se pudo consultar el estado');const data=await response.json();document.getElementById('processing-state').textContent=data.estado;progress.textContent=`${data.estado} · ${data.total_filas} filas recibidas`;if(!['PENDIENTE','PROCESANDO'].includes(data.estado)){location.reload();return}}catch(error){progress.textContent='No se pudo consultar el estado. Revise la conexión.'}setTimeout(tick,4000)};setTimeout(tick,4000)}

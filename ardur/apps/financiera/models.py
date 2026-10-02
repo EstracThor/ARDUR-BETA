@@ -1,0 +1,70 @@
+from django.conf import settings
+from django.db import models
+from ardur.apps.core.models import Entity
+
+class ImportacionCartera(Entity):
+    periodo = models.CharField(max_length=7)
+    hoja = models.CharField(max_length=255, default='Sheet 1')
+    archivo_original = models.FileField(upload_to='carteras/%Y/%m/')
+    sha256 = models.CharField(max_length=64, unique=True)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    estado = models.CharField(max_length=40, default='PENDIENTE', db_index=True)
+    total_filas = models.PositiveIntegerField(default=0)
+    filas_validas = models.PositiveIntegerField(default=0)
+    filas_revision = models.PositiveIntegerField(default=0)
+    filas_error = models.PositiveIntegerField(default=0)
+    error = models.TextField(blank=True)
+    aprobada = models.BooleanField(default=False)
+    catastro_version = models.ForeignKey('catastro.CatastroVersion', null=True, blank=True, on_delete=models.PROTECT)
+    task_id = models.CharField(max_length=255, blank=True)
+
+class RegistroCarteraRaw(Entity):
+    importacion = models.ForeignKey(ImportacionCartera, on_delete=models.PROTECT, related_name='raw')
+    numero_fila = models.PositiveIntegerField()
+    datos_originales = models.JSONField()
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['importacion', 'numero_fila'], name='raw_fila_unica')]
+
+class RegistroCarteraStaging(Entity):
+    raw = models.OneToOneField(RegistroCarteraRaw, on_delete=models.PROTECT, related_name='staging')
+    ciu = models.CharField(max_length=100, blank=True, db_index=True)
+    cedula_ruc = models.CharField(max_length=100, blank=True, db_index=True)
+    nombres = models.TextField(blank=True)
+    clave = models.CharField(max_length=254, blank=True, db_index=True)
+    predio_mun = models.CharField(max_length=254, blank=True)
+    suministro = models.CharField(max_length=254, blank=True, db_index=True)
+    direccion = models.TextField(blank=True)
+    parroquia = models.CharField(max_length=100, blank=True)
+    telefono = models.CharField(max_length=254, blank=True)
+    correo = models.CharField(max_length=254, blank=True)
+    total_emision = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    total_interes = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    total_coactiva = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    total_recargo = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    meses_deuda = models.PositiveIntegerField(default=0)
+    fallecido = models.BooleanField(default=False)
+    estado_validacion = models.CharField(max_length=30, default='VALIDO', db_index=True)
+    estado_catastro = models.CharField(max_length=30, default='SIN_COINCIDENCIA', db_index=True)
+    estado_historico = models.CharField(max_length=30, default='NUEVO', db_index=True)
+    requiere_revision = models.BooleanField(default=False, db_index=True)
+    motivo_revision = models.TextField(blank=True)
+    predio = models.ForeignKey('catastro.Predio', null=True, blank=True, on_delete=models.PROTECT)
+    proceso_coincidente = models.ForeignKey('expedientes.Expediente', null=True, blank=True, on_delete=models.PROTECT)
+    candidatos_catastro = models.JSONField(default=list)
+    decision = models.CharField(max_length=30, blank=True)
+    revisado_por = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT)
+    fecha_revision = models.DateTimeField(null=True, blank=True)
+
+class CarteraDetalle(Entity):
+    importacion = models.ForeignKey(ImportacionCartera, on_delete=models.PROTECT)
+    staging = models.OneToOneField(RegistroCarteraStaging, on_delete=models.PROTECT)
+    cliente = models.ForeignKey('clientes.Cliente', on_delete=models.PROTECT)
+    predio = models.ForeignKey('catastro.Predio', null=True, blank=True, on_delete=models.PROTECT)
+    ciu = models.CharField(max_length=100, blank=True, db_index=True)
+    suministro = models.CharField(max_length=254, blank=True)
+    clave = models.CharField(max_length=254, blank=True)
+    total_emision = models.DecimalField(max_digits=18, decimal_places=2)
+    total_interes = models.DecimalField(max_digits=18, decimal_places=2)
+    total_coactiva = models.DecimalField(max_digits=18, decimal_places=2)
+    total_recargo = models.DecimalField(max_digits=18, decimal_places=2)
+    meses_deuda = models.PositiveIntegerField()

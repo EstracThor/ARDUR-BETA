@@ -1,0 +1,8 @@
+.venv
+.git
+.env
+.local
+media
+staticfiles
+data/input
+__pycache__
